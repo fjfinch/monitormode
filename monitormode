@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# I had to change /etc/NetworkManager/NetworkManager.conf
+# -> added lines: [device] wifi.scan-rand-mac-address=no
+# NetworkManager can be configured to spoof interfaces MAC addresses
+# which could interfere with: 1) manually changing a MAC address; 2) getting wireless internet
+
+#PRECHECK: IS SUDO GIVEN?
+if [ "$EUID" -ne 0 ]; then
+        echo "Run it as root"
+        exit 1
+fi
+
+#PRECHECK: ARE 2 ARGS GIVEN?
+if [ "$#" -ne 2 ]; then
+	printf "Invalid input - Usage: sudo $(basename $0) <INTERFACE> <MODE>\n"
+        exit 1
+fi
+
+#VARIABLES
+declare -r -l INTERFACE="$1"
+declare -r -l MODE="$2"
+
+#CHECK: DOES INTERFACE EXIST?
+if [ ! -d /sys/class/net/"$INTERFACE" ]; then
+	printf "Invalid interface - check ifconfig\n"
+        x=1
+fi
+
+#CHECK: MODE CAN ONLY BE monitor OR managed
+if [[ "$MODE" != "monitor" && "$MODE" != "managed" ]]; then
+	printf "Invalid mode - managed or monitor\n"
+	x=1
+fi
+
+#EXIT WHEN ARGS ARE INVALID
+if [ -v x ]; then
+	exit 1
+fi
+
+
+
+#USER INPUT: KILL PROCESSES THAT CAN HAVE IMPACT ON MONITOR MODE
+if [ "$MODE" = "monitor" ]; then
+	while true; do
+		read -p "Do you want to kill processes that could interfere? (y/n): " input
+		case "$input" in
+			[Yy]|[Yy][Ee][Ss] ) airmon-ng check kill &>/dev/null; break;;
+			[Nn]|[Nn][Oo] ) break;;
+			* ) printf "Please answer y|yes or n|no\n";;
+		esac
+	done
+fi
+
+#DISABLE INTERFACE
+ip link set "$INTERFACE" down
+
+#SPOOF MAC ADDRESS
+if [ "$MODE" = "monitor" ]; then
+	macchanger -r -b "$INTERFACE" | grep New
+else
+	printf "Reset MAC:\t"; macchanger -p "$INTERFACE" | grep New | awk '{print $3}'
+fi
+
+#CHANGE INTERFACE MODE
+iw dev "$INTERFACE" set type "$MODE"
+if [ "$?" -eq 0 ]; then
+	printf "$INTERFACE changed to '$MODE'\n"
+else
+	printf "Failed to change mode\n"
+fi
+
+#ENABLE INTERFACE
+ip link set "$INTERFACE" up
+
+#USER INPUT: GET NETWORK BACK ON RUNNING
+if [ "$MODE" = "managed" ]; then
+        while true; do
+                read -p "Do you want to restart NetworkManager? (y/n): " input
+                case "$input" in
+                        [Yy]|[Yy][Ee][Ss] ) systemctl restart NetworkManager; break;;
+                        [Nn]|[Nn][Oo] ) break;;
+                        * ) printf "Please answer y|yes or n|no\n";;
+                esac
+        done
+fi
