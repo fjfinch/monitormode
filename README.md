@@ -26,3 +26,4 @@ Add lines to turn off auto MAC spoofing:
 `[device]`
 
 `wifi.scan-rand-mac-address=no`
+
