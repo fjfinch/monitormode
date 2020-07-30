@@ -36,20 +36,23 @@ if [ -v x ]; then
 fi
 
 
+RED='\033[0;31m'
+GREEN_BOLD='\033[1;32m'
+RESET='\033[0m'
 
 #DISABLING INTERFACE
 if ! ip link set "$INTERFACE" down; then
-	printf "Something went wrong when disabling %s\n" "$INTERFACE"
+	printf "${RED}Something went wrong when disabling %s${RESET}\n" "$INTERFACE"
 fi
 
 #CHANGING INTERFACE MODE
 if iw dev "$INTERFACE" set type "$MODE"; then
-	printf "%s changed to %s\n" "$INTERFACE" "$MODE"
+	printf "${GREEN_BOLD}%s changed to %s${RESET}\n" "$INTERFACE" "$MODE"
 else
-	printf "Failed to change mode\n"
+	printf "${RED}Failed to change mode${RESET}\n"
 fi
 
 #ENABLING INTERFACE
 if ! ip link set "$INTERFACE" up; then
-	printf "Something went wrong when enabling %s\n" "$INTERFACE"
+	printf "${RED}Something went wrong when enabling %s${RESET}\n" "$INTERFACE"
 fi
