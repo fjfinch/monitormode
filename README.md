@@ -10,7 +10,7 @@ This script is made because `sudo airmon-ng start <INTERFACE>` didn't work for m
 ## How to use?
 This script is made on/for (Debian) Kali Linux and makes use of `ip` and `iw`. Usage:
 ```bash
-(sudo) monitormode <interface> <mode>
+(sudo) monitormode <INTERFACE> <MODE>
 ```
 `interface`: the interface you want to change (prob. wlan0 or wlan1).
 `mode`: the mode you want to use (only monitor or managed are available for this script).
