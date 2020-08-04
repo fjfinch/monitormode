@@ -1,16 +1,23 @@
 #!/bin/bash
 
-# The script helps with putting a network interface into monitor mode. (and back into managed).
+# This script helps with putting a network interface (NIC) into monitor mode. (and back into managed mode).
+# Two arguments are needed. The <INTERFACE> (ex. wlan0), and the <MODE> (managed or monitor)
+# ---------------------------------------------------------------------
+
+#COLORED OUTPUT
+declare -r RED='\033[0;31m'
+declare -r GREEN='\033[1;32m'
+declare -r RESET='\033[0m'
 
 #PRECHECK: IS SUDO GIVEN?
-if [ "$EUID" -ne 0 ]; then
-        printf "Run it as root\n"
+if [ "${EUID}" -ne 0 ]; then
+        printf "${RED}Run it as root${RESET}\n"
         exit 1
 fi
 
 #PRECHECK: ARE 2 ARGS GIVEN?
 if [ "$#" -ne 2 ]; then
-	printf "Invalid input\nUsage: sudo %s <INTERFACE> <MODE>\n" "$(basename "$0")"
+	printf "${RED}Missing arguments.${RESET} Usage: sudo %s <INTERFACE> <MODE>\n" "$(basename "$0")"
         exit 1
 fi
 
@@ -19,14 +26,14 @@ declare -r -l INTERFACE="$1"
 declare -r -l MODE="$2"
 
 #CHECK: DOES INTERFACE EXIST?
-if [ ! -d /sys/class/net/"$INTERFACE" ]; then
-	printf "Invalid interface - check ifconfig\n"
+if [ ! -d /sys/class/net/"${INTERFACE}" ]; then
+	printf "${RED}Invalid interface - check ifconfig or iwconfig${RESET}\n"
         x=1
 fi
 
 #CHECK: IS MODE monitor OR managed?
-if [[ "$MODE" != "monitor" && "$MODE" != "managed" ]]; then
-	printf "Invalid mode - managed or monitor\n"
+if [[ "${MODE}" != "monitor" && "${MODE}" != "managed" ]]; then
+	printf "${RED}Invalid mode - managed or monitor${RESET}\n"
 	x=1
 fi
 
@@ -35,24 +42,21 @@ if [ -v x ]; then
 	exit 1
 fi
 
-
-RED='\033[0;31m'
-GREEN_BOLD='\033[1;32m'
-RESET='\033[0m'
+#----------------------------------------------------------------------
 
 #DISABLING INTERFACE
-if ! ip link set "$INTERFACE" down; then
-	printf "${RED}Something went wrong when disabling %s${RESET}\n" "$INTERFACE"
+if ! ip link set "${INTERFACE}" down; then
+	printf "${RED}Something went wrong when disabling %s${RESET}\n" "${INTERFACE}"
 fi
 
 #CHANGING INTERFACE MODE
-if iw dev "$INTERFACE" set type "$MODE"; then
-	printf "${GREEN_BOLD}%s changed to %s${RESET}\n" "$INTERFACE" "$MODE"
+if iw dev "${INTERFACE}" set type "${MODE}"; then
+	printf "${GREEN}%s changed to %s${RESET}\n" "${INTERFACE}" "${MODE}"
 else
 	printf "${RED}Failed to change mode${RESET}\n"
 fi
 
 #ENABLING INTERFACE
-if ! ip link set "$INTERFACE" up; then
-	printf "${RED}Something went wrong when enabling %s${RESET}\n" "$INTERFACE"
+if ! ip link set "${INTERFACE}" up; then
+	printf "${RED}Something went wrong when enabling %s${RESET}\n" "${INTERFACE}"
 fi
