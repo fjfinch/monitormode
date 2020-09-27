@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# This script helps with putting a network interface (NIC) into monitor mode. (and back into managed mode).
-# Two arguments are needed. The <INTERFACE> (ex. wlan0), and the <MODE> (managed or monitor)
-# ---------------------------------------------------------------------
-
 #COLORED OUTPUT
-declare -r RED='\033[0;31m'
-declare -r GREEN='\033[1;32m'
-declare -r RESET='\033[0m'
+readonly RED='\033[0;31m'
+readonly GREEN='\033[1;32m'
+readonly RESET='\033[0m'
 
 #PRECHECK: IS SUDO GIVEN?
 if [ "${EUID}" -ne 0 ]; then
@@ -16,14 +12,16 @@ if [ "${EUID}" -ne 0 ]; then
 fi
 
 #PRECHECK: ARE 2 ARGS GIVEN?
-if [ "$#" -ne 2 ]; then
-	printf "${RED}Missing arguments.${RESET} Usage: sudo %s <INTERFACE> <MODE>\n" "$(basename "$0")"
+if [ "${#}" -ne 2 ]; then
+	printf "${RED}Missing arguments${RESET}\nUsage: sudo %s <INTERFACE> <MODE>\n" "$(basename "${0}")"
         exit 1
 fi
 
+#----------------------------------------------------------------------
+
 #ARGUMENTS AS VARIABLES
-declare -r -l INTERFACE="$1"
-declare -r -l MODE="$2"
+declare -r -l INTERFACE="${1}"
+declare -r -l MODE="${2}"
 
 #CHECK: DOES INTERFACE EXIST?
 if [ ! -d /sys/class/net/"${INTERFACE}" ]; then
