@@ -2,7 +2,7 @@
 
 #COLORED OUTPUT
 readonly RED='\033[0;31m'
-readonly GREEN='\033[1;32m'
+readonly GREEN_BOLD='\033[1;32m'
 readonly RESET='\033[0m'
 
 #PRECHECK: IS SUDO GIVEN?
@@ -49,7 +49,7 @@ fi
 
 #CHANGING INTERFACE MODE
 if iw dev "${INTERFACE}" set type "${MODE}"; then
-	printf "${GREEN}%s changed to %s${RESET}\n" "${INTERFACE}" "${MODE}"
+	printf "${GREEN_BOLD}%s changed to %s${RESET}\n" "${INTERFACE}" "${MODE}"
 else
 	printf "${RED}Failed to change mode${RESET}\n"
 fi
